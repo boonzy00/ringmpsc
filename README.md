@@ -18,7 +18,7 @@ Throughput benchmark on AMD Ryzen 7 5700 (8 cores, 16 threads, 32MB L3 cache):
 
 ## Algorithm
 
-Nova uses a **ring-decomposed** architecture where each producer has a dedicated SPSC (Single-Producer Single-Consumer) ring buffer. This eliminates producer-producer contention entirely.
+RingMPSC uses a **ring-decomposed** architecture where each producer has a dedicated SPSC (Single-Producer Single-Consumer) ring buffer. This eliminates producer-producer contention entirely.
 
 ```
 Producer 0 ──► [Ring 0] ──┐
@@ -62,10 +62,10 @@ Producer N ──► [Ring N] ──┘
 ## Usage
 
 ```zig
-const nova = @import("src/channel.zig");
+const ringmpsc = @import("src/channel.zig");
 
 // Create channel with default config (64K slots, 16 max producers)
-var channel = nova.Channel(u64, nova.default_config){};
+var channel = ringmpsc.Channel(u64, ringmpsc.default_config){};
 
 // Register producer
 const producer = try channel.register();
@@ -123,7 +123,7 @@ ringmpsc/
 
 ## Correctness Properties
 
-Nova guarantees the following properties (verified by included tests):
+RingMPSC guarantees the following properties (verified by included tests):
 
 1. **Per-Producer FIFO**: Messages from a single producer are received in order.
 2. **No Data Loss**: All sent messages are eventually received.

@@ -1,7 +1,7 @@
 //! Race Condition Detection: Validates thread safety under chaotic scheduling
 
 const std = @import("std");
-const nova = @import("channel");
+const ringmpsc = @import("channel");
 
 const P: usize = 8;
 const MSG: u64 = 100_000;
@@ -34,7 +34,7 @@ pub fn main() !void {
 fn iteration(iter: usize) !bool {
     var gpa = std.heap.GeneralPurposeAllocator(.{}){};
     defer _ = gpa.deinit();
-    const ch = try gpa.allocator().create(nova.Channel(u64, nova.default_config));
+    const ch = try gpa.allocator().create(ringmpsc.Channel(u64, ringmpsc.default_config));
     defer gpa.allocator().destroy(ch);
     ch.* = .{};
 
@@ -63,7 +63,7 @@ fn iteration(iter: usize) !bool {
     return sum == expected;
 }
 
-fn worker(ch: *nova.Channel(u64, nova.default_config), id: usize, iter: usize, sum_out: *std.atomic.Value(u64)) void {
+fn worker(ch: *ringmpsc.Channel(u64, ringmpsc.default_config), id: usize, iter: usize, sum_out: *std.atomic.Value(u64)) void {
     const max = std.Thread.getCpuCount() catch 16;
     pin((id + iter) % max);
     const p = ch.register() catch return;

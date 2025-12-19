@@ -1,13 +1,13 @@
 //! FIFO Ordering Test: Verifies sequential consistency per producer
 
 const std = @import("std");
-const nova = @import("channel");
+const ringmpsc = @import("channel");
 
 const P: usize = 8;
 const MSG: u64 = 1_000_000;
 const TOTAL: u64 = P * MSG;
 
-var channel: nova.Channel(u64, nova.default_config) = .{};
+var channel: ringmpsc.Channel(u64, ringmpsc.default_config) = .{};
 
 pub fn main() !void {
     std.debug.print("═══════════════════════════════════════════════════════════════════════════════\n", .{});

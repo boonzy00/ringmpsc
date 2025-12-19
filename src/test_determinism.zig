@@ -1,7 +1,7 @@
 //! Deterministic Execution Verification: Validates reproducible per-producer checksums
 
 const std = @import("std");
-const nova = @import("channel");
+const ringmpsc = @import("channel");
 
 const P: usize = 4;
 const MSG: u64 = 500_000;
@@ -35,12 +35,12 @@ pub fn main() !void {
 fn run(seed: u64) !struct { sums: [P]u64, total: u64, n: u64 } {
     var gpa = std.heap.GeneralPurposeAllocator(.{}){};
     defer _ = gpa.deinit();
-    const ch = try gpa.allocator().create(nova.Channel(u64, nova.default_config));
+    const ch = try gpa.allocator().create(ringmpsc.Channel(u64, ringmpsc.default_config));
     defer gpa.allocator().destroy(ch);
     ch.* = .{};
 
     // Pre-register producers synchronously for deterministic IDs
-    var producers: [P]nova.Channel(u64, nova.default_config).Producer = undefined;
+    var producers: [P]ringmpsc.Channel(u64, ringmpsc.default_config).Producer = undefined;
     for (0..P) |i| producers[i] = try ch.register();
 
     var sums: [P]std.atomic.Value(u64) = undefined;
@@ -68,7 +68,7 @@ fn run(seed: u64) !struct { sums: [P]u64, total: u64, n: u64 } {
     return .{ .sums = result_sums, .total = total, .n = got };
 }
 
-fn worker(p: nova.Channel(u64, nova.default_config).Producer, id: usize, seed: u64, sum_out: *std.atomic.Value(u64)) void {
+fn worker(p: ringmpsc.Channel(u64, ringmpsc.default_config).Producer, id: usize, seed: u64, sum_out: *std.atomic.Value(u64)) void {
     pin(id);
     _ = seed;
 

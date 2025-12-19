@@ -2,7 +2,7 @@
 //! Target: 50+ billion messages per second on AMD Ryzen 7 5700
 
 const std = @import("std");
-const nova = @import("channel");
+const ringmpsc = @import("channel");
 
 // Configuration
 const MSG: u64 = 500_000_000;  // 500M messages per producer
@@ -11,9 +11,9 @@ const RING_BITS: u6 = 16;      // 64K slots per ring
 const MAX_PRODUCERS: usize = 8;
 const CPU_COUNT: usize = 16;   // Ryzen 7 5700: 8 cores, 16 threads
 
-const config = nova.Config{ .ring_bits = RING_BITS, .max_producers = MAX_PRODUCERS };
-const ChannelType = nova.Channel(u32, config);
-const RingType = nova.Ring(u32, config);
+const config = ringmpsc.Config{ .ring_bits = RING_BITS, .max_producers = MAX_PRODUCERS };
+const ChannelType = ringmpsc.Channel(u32, config);
+const RingType = ringmpsc.Ring(u32, config);
 
 // No-op consumer handler (compiler optimizes away the loop body)
 const Consumer = struct {
