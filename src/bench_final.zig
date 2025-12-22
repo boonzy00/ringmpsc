@@ -1,12 +1,12 @@
 //! RingMPSC - Throughput Benchmark
-//! Standardized unbatched config for cross-implementation comparison
+//! Batched config for maximum throughput demonstration
 
 const std = @import("std");
 const ringmpsc = @import("channel");
 
 // Configuration
-const MSG: u64 = 100_000_000; // 100M messages per producer
-const BATCH: usize = 1; // Unbuffered (batch size 1)
+const MSG: u64 = 500_000_000; // 500M messages per producer
+const BATCH: usize = 32768; // Batch size for amortizing atomic ops
 const RING_BITS: u6 = 16; // 64K slots per ring
 const MAX_PRODUCERS: usize = 8;
 const CPU_COUNT: usize = 16; // Ryzen 7 5700: 8 cores, 16 threads
@@ -25,8 +25,8 @@ pub fn main() !void {
     std.debug.print("═══════════════════════════════════════════════════════════════════════════════\n", .{});
     std.debug.print("║                       RINGMPSC - THROUGHPUT BENCHMARK                       ║\n", .{});
     std.debug.print("═══════════════════════════════════════════════════════════════════════════════\n", .{});
-    std.debug.print("Platform: x86_64 (standardized unbatched config)\n", .{});
-    std.debug.print("Config:   {d}M msgs/producer, batch={d}, ring={d}K slots\n\n", .{ MSG / 1_000_000, BATCH, @as(u64, 1) << RING_BITS >> 10 });
+    std.debug.print("Platform: x86_64 (batched config for max throughput)\n", .{});
+    std.debug.print("Config:   {d}M msgs/producer, batch={d}K, ring={d}K slots\n\n", .{ MSG / 1_000_000, BATCH / 1024, @as(u64, 1) << RING_BITS >> 10 });
     std.debug.print("┌─────────────┬───────────────┬─────────┐\n", .{});
     std.debug.print("│ Config      │ Throughput    │ Status  │\n", .{});
     std.debug.print("├─────────────┼───────────────┼─────────┤\n", .{});
@@ -38,7 +38,7 @@ pub fn main() !void {
     const counts = [_]usize{ 1, 2, 4, 6, 8 };
     for (counts) |p| {
         const r = try runTest(p);
-        const status = if (r.rate >= 1.0) "✓ PASS" else if (r.rate >= 0.5) "○ OK  " else "✗ LOW ";
+        const status = if (r.rate >= 5.0) "✓ PASS" else if (r.rate >= 2.0) "○ OK  " else "✗ LOW ";
         std.debug.print("│ {d}P{d}C        │ {d:>8.2} B/s  │ {s} │\n", .{ p, p, r.rate, status });
     }
 

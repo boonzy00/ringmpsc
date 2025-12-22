@@ -4,8 +4,8 @@ use std::sync::Arc;
 use std::thread;
 use std::time::Instant;
 
-const MSG: u64 = 100_000_000; // 100M messages per producer
-const BATCH: usize = 1;
+const MSG: u64 = 500_000_000; // 500M messages per producer
+const BATCH: usize = 32768; // Batch size for amortizing atomic ops
 const RING_SIZE: usize = 1 << 16; // 64K slots
 
 fn main() {
@@ -14,9 +14,9 @@ fn main() {
     println!("║                       RINGMPSC - RUST BENCHMARK                             ║");
     println!("═══════════════════════════════════════════════════════════════════════════════");
     println!(
-        "Config:   {}M msgs/producer, batch={}, ring={}K slots",
+        "Config:   {}M msgs/producer, batch={}K, ring={}K slots",
         MSG / 1_000_000,
-        BATCH,
+        BATCH / 1024,
         RING_SIZE >> 10
     );
 
@@ -35,9 +35,9 @@ fn main() {
         // Pin only for 1P1C (A/B test showed improvement)
         let use_pinning = p == 1;
         let rate = run_test(p, use_pinning);
-        let status = if rate >= 1.0 {
+        let status = if rate >= 5.0 {
             "✓ PASS"
-        } else if rate >= 0.5 {
+        } else if rate >= 2.0 {
             "○ OK  "
         } else {
             "✗ LOW "
