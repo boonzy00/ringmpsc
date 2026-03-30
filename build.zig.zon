@@ -1,0 +1,14 @@
+.{
+    .name = .ringmpsc,
+    .version = "2.3.0",
+    .fingerprint = 0xc181d89cfb2f5eb6,
+    .minimum_zig_version = "0.14.0",
+    .paths = .{
+        "build.zig",
+        "build.zig.zon",
+        "src",
+        "LICENSE",
+        "README.md",
+    },
+    .dependencies = .{},
+}

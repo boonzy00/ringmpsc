@@ -1,0 +1,13 @@
+[package]
+name = "ringmpsc"
+version = "2.3.0"
+edition = "2021"
+description = "Lock-free ring-decomposed MPSC channel — Rust port"
+
+[dependencies]
+libc = "0.2"
+
+[profile.release]
+opt-level = 3
+lto = "fat"
+codegen-units = 1

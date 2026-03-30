@@ -1,0 +1,2 @@
+# Override GitHub language detection - this is primarily a Zig project
+bindings/** linguist-vendored
